@@ -1,0 +1,47 @@
+
+ECR
+Registry
+Docker Image
+Lambda Function
+API Gateway
+ (Rest Endpoint)
+End Users
+Request
+Inference
+Model
+Deployment
+
+Image Classification 
+TensorFlow model
+S3 Bucket 
+(Save Model Artifacts)
+Docker
+(Image Generation)
+Model Development
+1
+3
+Model Artifact Storage
+2
+Model
+Inference
+4
+TF Image Recognition Model Development and Deployment on AWS 
+TensorFlow based Image classification model was built to predict the disease based on the images and deployed on AWS
+
+1. Training
+The model was trained with 10k photos. The photos were segregated into train, validation and test set in the ratio 80:10:10. The model was trained with 30 epochs.
+
+2. Model performance
+The test accuracy of the model was around 94.12
+Model Artifacts:
+The models was saved in .h5 format as well as Json and weights format. Both the model artifacts was moved to s3 bucket.
+
+3. Lambda handler function script
+The AWS lambda handler function script was prepared to load the model, convert the input data into required format, predict the output and return the output in required format
+
+4. Docker image
+The docker image was built with the model artifacts and lambda function scripts. The docker file was uploaded to Elastic Container Registry
+
+5. Create lambda function service & API Gateway
+The lambda function was created to invoke the docker image whenever there is user request from API Gateway
+

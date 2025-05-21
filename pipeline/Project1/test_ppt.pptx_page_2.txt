@@ -1,0 +1,65 @@
+Few code snippets from the project
+def handler(event, context):
+
+Lambda function to handle the user request and return the inference output
+
+image = event["body"]
+img_b64dec = base64.b64decode(image)
+img_byteIo = BytesI0(img_b64dec)
+
+image = Image. open(img_byteIo)
+image_batch = np.expand_dims(image, 0)
+
+predictions = MODEL.predict(image_batch)
+predicted_class = CLASS_NAMES[np.argmax(predictions[0])]
+
+print(predicted_class)
+confidence = np.max(predictions[@])
+
+return {
+"statusCode": 200,
+"body": json.dumps({"class": predicted_class, "confidence": float(confidence)}),
+
+
+ARG FUNCTION _DIR="/function™
+FROM public.ecr.aws/docker/library/python:buster as build-image
+ARG FUNCTION DIR
+
+RUN apt-get update && \
+apt-get install -y \
+gt \
+make \
+cmake \
+unzip \
+libcur14-openssl-dev
+
+RUN mkdir -p ${FUNCTION DIR}
+COPY app/ ${FUNCTION_DIR}/
+
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt -t ${FUNCTION_DIR}
+
+RUN pip install \
+--target ${FUNCTION DIR} \
+awslambdaric
+
+FROM public.ecr.aws/docker/library/python: buster
+ARG FUNCTION DIR
+WORKDIR ${FUNCTION DIR}
+
+copy --from=build-image ${FUNCTION DIR} ${FUNCTION DIR}
+
+ENTRYPOINT [ “/usr/local/bin/python”, "-m", “awslambdaric™ ]
+MD [ “app-handler™ ]
+
+y Function overview info
+
+Diagram Template
+
++ Add trigger
+
+
+Note: The code snippets or snapshot only show the portion of the code of a section and not the entire section. Happy to provide more details or discuss any point
+Figure 1: Code snippet for handler function within AWS lambda
+Figure 2: AWS lambda deployment and API gateway connection
+Figure 3: Docker file to create the image
