@@ -19,8 +19,8 @@ pytesseract.pytesseract.tesseract_cmd = (
 )
 
 
-def temporary_folder_path():
-    folder_path = os.path.join("pipeline", "temporary")
+def temporary_folder_path(folder_name="temporary"):
+    folder_path = os.path.join("pipeline", folder_name)
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
     return folder_path
@@ -64,10 +64,12 @@ def pdf_parser(file_path, file_name):
                     image_file.write(image_bytes)
                     print(f"[+] Image saved as {image_name}")
 
+                ## For normal ocr to extract data from image
                 # image_text = pytesseract.image_to_string(
                 #     join(temporary_folder_path(), image_name)
                 # )
 
+                ## For transformer based ocr hosted on hugging face to extract data from image
                 image_text = extract_image_data_got_ocr2(
                     join(temporary_folder_path(), image_name)
                 )
@@ -113,10 +115,12 @@ def pptx_parser(file_path, file_name):
                     img_file.close()
                 image_count += 1
 
+                # For normal ocr to extract data from image
                 image_text = pytesseract.image_to_string(
                     join(temporary_folder_path(), image_name)
                 )
 
+                ## For transformer based ocr hosted on hugging face to extract data from image
                 # image_text = extract_image_data_got_ocr2(
                 #     join(temporary_folder_path(), image_name)
                 # )
@@ -175,10 +179,12 @@ def docx_parser(file_path, file_name):
             with open(join(temporary_folder_path(), image_name), "wb") as img_file:
                 img_file.write(image_bytes)
 
+            ## For normal ocr to extract data from image
             # image_text = pytesseract.image_to_string(
             #     join(temporary_folder_path(), image_name)
             # )
 
+            ## For transformer based ocr hosted on hugging face to extract data from image
             image_text = extract_image_data_got_ocr2(
                 join(temporary_folder_path(), image_name)
             )
@@ -241,6 +247,7 @@ def xlsx_reader(file_path, file_name):
 # file_name = "test_docx.docx"
 
 
-# pdf_reader(file_path, file_name)
-# file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\test_data\\test_ppt.pptx"
-# file_name = "test_ppt.pptx"
+# "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader", "resume.pdf"
+file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\resume.pdf"
+file_name = "resume.pdf"
+pdf_reader(file_path, file_name)
