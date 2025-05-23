@@ -13,6 +13,7 @@ from docx import Document
 import os
 from os.path import join
 from gotOCR import extract_image_data_got_ocr2
+import tiktoken
 
 pytesseract.pytesseract.tesseract_cmd = (
     "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
@@ -141,6 +142,11 @@ def pptx_parser(file_path, file_name):
     return text_file_path_list
 
 
+def num_tokens_from_text(text, model_name):
+    encoding = tiktoken.encoding_for_model(model_name)
+    return len(encoding.encode(text))
+
+
 def create_documents(text_file_path_list):
     document_list = []
     text_splitter = RecursiveCharacterTextSplitter(
@@ -149,14 +155,16 @@ def create_documents(text_file_path_list):
         length_function=len,
         is_separator_regex=False,
     )
+    token_counts = 0
     for i in text_file_path_list:
         with open(i) as f:
             raw_text = f.read()
+            token_counts += num_tokens_from_text(raw_text, "text-embedding-3-small")
             document = text_splitter.create_documents([raw_text])
             document_list.extend(document)
             f.close()
 
-    return document_list
+    return document_list, token_counts
 
 
 def docx_parser(file_path, file_name):
@@ -210,37 +218,56 @@ def docx_parser(file_path, file_name):
 def txt_reader(file_path):
     text_loader = TextLoader(file_path)
     text_data = text_loader.load()
-    return text_data
+
+    token_counts = sum(
+        [
+            num_tokens_from_text(text.page_content, "text-embedding-3-small")
+            for text in text_data
+        ]
+    )
+
+    return text_data, token_counts
 
 
 def docx_reader(file_path, file_name):
     text_file_path_list = docx_parser(file_path, file_name)
-    document_list = create_documents(text_file_path_list)
-    return document_list
+    document_list, token_counts = create_documents(text_file_path_list)
+    return document_list, token_counts
 
 
 def pptx_reader(file_path, file_name):
     text_file_path_list = pptx_parser(file_path, file_name)
-    document_list = create_documents(text_file_path_list)
-    return document_list
+    document_list, token_counts = create_documents(text_file_path_list)
+    return document_list, token_counts
 
 
 def pdf_reader(file_path, file_name):
     text_file_path_list = pdf_parser(file_path, file_name)
-    document_list = create_documents(text_file_path_list)
-    return document_list
+    document_list, token_counts = create_documents(text_file_path_list)
+    return document_list, token_counts
 
 
 def xlsx_reader(file_path, file_name):
     xlsx_loader = UnstructuredExcelLoader(file_path, mode="elements")
     xlsx_text = xlsx_loader.load()
-    return xlsx_text
+
+    token_counts = sum(
+        [
+            num_tokens_from_text(text.page_content, "text-embedding-3-small")
+            for text in xlsx_text
+        ]
+    )
+    return xlsx_text, token_counts
 
 
 ### Testing ####
-# docx_reader(file_path, file_name)
-# file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\test_xlsx.xlsx"
+
+# file_path = (
+#     "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\test_xlsx.xlsx"
+# )
 # file_name = "test_xlsx.xlsx"
+# print(xlsx_reader(file_path, file_name))
+
 
 # pptx_reader(file_path, file_name)
 # file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\test_docx.docx"
@@ -248,6 +275,6 @@ def xlsx_reader(file_path, file_name):
 
 
 # "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader", "resume.pdf"
-file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\resume.pdf"
-file_name = "resume.pdf"
-pdf_reader(file_path, file_name)
+# file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\resume.pdf"
+# file_name = "resume.pdf"
+# pdf_reader(file_path, file_name)

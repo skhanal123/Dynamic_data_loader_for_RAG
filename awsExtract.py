@@ -9,9 +9,14 @@ from awsextractParser import extract_text
 from textractor import Textractor
 from textractor.data.constants import TextractFeatures
 from textractor.data.text_linearization_config import TextLinearizationConfig
+from textractcaller.t_call import call_textract, Textract_Features
+from textractprettyprinter.t_pretty_print import get_text_from_layout_json
 
 
 def split_pdf_into_pages(folder_path, file_name):
+    """
+    Contains logic to parse the response from AWS textract api call
+    """
     output_folder_path = temporary_folder_path(folder_name="output_pages")
 
     # Read the input PDF
@@ -37,6 +42,9 @@ def split_pdf_into_pages(folder_path, file_name):
 
 
 def awsextract_pdf(folder_path, file_name):
+    """
+    Utilize AWS textract to extract data from files
+    """
     load_dotenv()
     client = boto3.client(
         "textract",
@@ -70,7 +78,9 @@ def awsextract_pdf(folder_path, file_name):
 
 
 def textractor_pdf(file_path):
-
+    """
+    Utilize textractor to extract data from files
+    """
     extractor = Textractor(profile_name="ml_user")
 
     config = TextLinearizationConfig(
@@ -86,3 +96,22 @@ def textractor_pdf(file_path):
 
 # file_path = "C:\\Users\\skhan\\Documents\\GITHUB\\LANGCHAIN\\Data_Loader\\pipeline\\output_pages\\resume_page_1.pdf"
 # textractor_pdf(file_path)
+
+
+def textractcaller_pdf(file_path):
+    """
+    Utilize text extraction from using textractcaller
+    """
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+
+    layout_textract_json = call_textract(
+        input_document=file_bytes, features=[Textract_Features.LAYOUT]
+    )
+
+    layout_text = get_text_from_layout_json(textract_json=layout_textract_json)[1]
+    return layout_text
+
+
+## Test call
+# textractcaller_pdf(file_path)
